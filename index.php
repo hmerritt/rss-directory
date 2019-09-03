@@ -15,18 +15,33 @@
 */
 $config = [
 
-  // Header info of RSS feed
-  "title" => "",
-  "link" => "",
-  "description" => "",
+    // Header info of RSS feed
+    "title" => "",
+    "link" => "",
+    "description" => "",
 
 
-  // Name of each item
-  "item" => "item",
+    // Name of each item
+    "item" => "item",
 
 
-  // Link to file protocol
-  "link_prefix" => "https://"
+    // Layout of each item
+    // -> name      - name of file
+    // -> size      - file sie
+    // -> type      - mime-type of file
+    // -> modified  - last modified time (unix)
+    // -> url       - full url to file
+    "item_layout" => "
+        <name> %name% </name>
+        <size> %size% </size>
+        <type> %type% </type>
+        <modified> %modified% </modified>
+        <link> %url% </link>
+    ",
+
+
+    // Link to file protocol
+    "link_prefix" => "https://"
 
 ];
 
@@ -110,25 +125,6 @@ class Xml {
 
 
     /**
-     * Add item to xml $output
-     *
-     * @return null
-     */
-    public function addItem($properties) {
-        // Create new file
-        $newFile = [
-            ["name", $properties["name"]],
-            ["size", $properties["size"]],
-            ["type", $properties["type"]],
-            ["modified", $properties["modified"]]
-        ];
-
-        // Add file $properties to xml output
-        array_push($this->files, $newFile);
-    }
-
-
-    /**
      * Get the xml text of current obj
      *
      * @return string
@@ -149,12 +145,17 @@ class Xml {
         // Loop items array
         foreach($this->items as $item) {
             // Create item xml
-            $item_xml = "";
-            // Loop each property in the item
-            foreach($item as $property) {
-                //
-                $item_xml .= "<".$property[0].">" . $property[1] . "</".$property[0].">";
+            $item_xml = $config["item_layout"];
+            // Find all %values% within item_layout
+            $findXmlVariables = preg_match_all("/\%.+\%/", $item_xml, $xmlVariables);
+            if (count($xmlVariables[0]) > 0) {
+                // Loop all matches
+                foreach($xmlVariables[0] as $xmlVar) {
+                    $xmlVarActual = substr($xmlVar, 1, -1);
+                    $item_xml = preg_replace("/%$xmlVarActual%/", $item[$xmlVarActual], $item_xml);
+                }
             }
+
             // Wrap item with <file> tag in $output
             $output .= "
     <".$config["item"].">" . $item_xml . "</".$config["item"].">
@@ -204,11 +205,7 @@ foreach($filesArr as $file) {
     $filePath = $path ."/". $file;
     // Get file properties
     $properties = $File->properties($filePath);
-    $thisFile = [
-        ["title", $properties["name"]],
-        ["url", $properties["url"]],
-    ];
-    array_push($filePropertiesArr, $thisFile);
+    array_push($filePropertiesArr, $properties);
 }
 
 
