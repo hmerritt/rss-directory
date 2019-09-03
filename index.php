@@ -56,7 +56,7 @@ class File {
         ];
 
         // Check if file exists
-        if ($this->exists(($path)) {
+        if ($this->exists($path)) {
             // Get file path info
             $filePathInfo = pathinfo($path);
             // Set file properties
@@ -79,13 +79,13 @@ class File {
 class Xml {
 
 
-    __construct($title="", $link="", $description="") {
+    function __construct($title="", $link="", $description="", $items=[]) {
         /**  @var string Set xml properties */
         $this->title       = $title;
         $this->link        = $link;
         $this->description = $description;
         /**  @var array All items */
-        $this->items = [];
+        $this->items = $items;
     }
 
 
@@ -115,12 +115,12 @@ class Xml {
      */
     public function getText() {
         // Create xml
-        $output .= "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-          <rss version=\"2.0\">
-          <channel>
-              <title>$this->title</title>
-              <link>$this->link</link>
-              <description>$this->description</description>
+        $output = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+<rss version=\"2.0\">
+<channel>
+    <title>$this->title</title>
+    <link>$this->link</link>
+    <description>$this->description</description>
         ";
 
         // Add items
@@ -131,19 +131,18 @@ class Xml {
             // Loop each property in the item
             foreach($item as $property) {
                 //
-                $item_xml = .= "<".$property[0].">" . $property[1] . "</".$property[0].">";
+                $item_xml .= "<".$property[0].">" . $property[1] . "</".$property[0].">";
             }
             // Wrap item with <file> tag in $output
-            $output .= "<file>" . $item_xml . "</file>";
+            $output .= "
+    <file>" . $item_xml . "</file>
+            ";
         }
-
-        // Wrap items in a <file> tag
-        $output .= "<file>" . $item_xml . "</file>";
 
         // End xml
         $output .= "
-          </channel>
-          </rss>
+</channel>
+</rss>
         ";
 
         return $output;
@@ -155,9 +154,44 @@ class Xml {
      *
      * @return null
      */
-    public function addItem($properties) {
+    public function output() {
         // Return xml text and exit
         die($this->getText());
     }
 
+
 }
+
+
+
+
+// Get url params
+$path = $_GET["path"];
+
+
+// Init file obj and xml objects
+$File = new File();
+
+// Scan files
+$filesArr = $File->scanDir($path);
+$filePropertiesArr = [];
+
+// Get file properties for all scanned files
+foreach($filesArr as $file) {
+    // Set file path
+    $filePath = $path ."/". $file;
+    // Get file properties
+    $properties = $File->properties($filePath);
+    $thisFile = [
+        ["name", $properties["name"]],
+        ["size", $properties["size"]],
+        ["type", $properties["type"]],
+        ["modified", $properties["modified"]]
+    ];
+    array_push($filePropertiesArr, $thisFile);
+}
+
+
+// Init xml obj
+$xml = new Xml("", "", "", $filePropertiesArr);
+$xml->output();
