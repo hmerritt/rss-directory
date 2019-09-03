@@ -79,50 +79,85 @@ class File {
 class Xml {
 
 
-    /**  @var string $output final output of xml text */
-    public $output = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-<rss version=\"2.0\">
-
-      <channel>
-        <title></title>
-        <link></link>
-        <description></description>
-    ";
-
-
-    /**
-     * Add file to xml $output
-     *
-     * @return bool
-     */
-    public function addFile($properties) {
-        // Add file $properties to xml output
-        $this->output .= "
-            <file>
-                <name>". $properties["name"] ."</name>
-                <size>". $properties["size"] ."</size>
-                <type>". $properties["type"] ."</type>
-                <modified>". $properties["modified"] ."</modified>
-            </file>
-        ";
-
-        return true;
+    __construct($title="", $link="", $description="") {
+        /**  @var string Set xml properties */
+        $this->title       = $title;
+        $this->link        = $link;
+        $this->description = $description;
+        /**  @var array All items */
+        $this->items = [];
     }
 
 
     /**
-     * Print xml to page and exit
+     * Add item to xml $output
      *
-     * @return $output
+     * @return null
      */
-    public function output() {
+    public function addItem($properties) {
+        // Create new file
+        $newFile = [
+            ["name", $properties["name"]],
+            ["size", $properties["size"]],
+            ["type", $properties["type"]],
+            ["modified", $properties["modified"]]
+        ];
+
+        // Add file $properties to xml output
+        array_push($this->files, $newFile);
+    }
+
+
+    /**
+     * Get the xml text of current obj
+     *
+     * @return string
+     */
+    public function getText() {
+        // Create xml
+        $output .= "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+          <rss version=\"2.0\">
+          <channel>
+              <title>$this->title</title>
+              <link>$this->link</link>
+              <description>$this->description</description>
+        ";
+
+        // Add items
+        // Loop items array
+        foreach($this->items as $item) {
+            // Create item xml
+            $item_xml = "";
+            // Loop each property in the item
+            foreach($item as $property) {
+                //
+                $item_xml = .= "<".$property[0].">" . $property[1] . "</".$property[0].">";
+            }
+            // Wrap item with <file> tag in $output
+            $output .= "<file>" . $item_xml . "</file>";
+        }
+
+        // Wrap items in a <file> tag
+        $output .= "<file>" . $item_xml . "</file>";
+
         // End xml
-        $this->output .= "
+        $output .= "
           </channel>
           </rss>
         ";
-        // Print xml and exit
-        die($this->output);
+
+        return $output;
+    }
+
+
+    /**
+     * Output xml and exit
+     *
+     * @return null
+     */
+    public function addItem($properties) {
+        // Return xml text and exit
+        die($this->getText());
     }
 
 }
