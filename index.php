@@ -58,11 +58,33 @@ class File {
      *
      * @return array
      */
-    public function scanDir($path) {
+    public function scanDir($path, $sorting_order=SCANDIR_SORT_DESCENDING) {
         // Scan directory
-        // remove unwanted values '.', '..'
-        $scannedFiles = array_slice(scandir($path), 2);
-        return $scannedFiles;
+        // Roll through the scandir values.
+        $files = array();
+        foreach (scandir($path, $sorting_order) as $file) {
+          if ($file[0] === '.') {
+            continue;
+          }
+          $files[$file] = filemtime($path . '/' . $file);
+        } // foreach
+
+        /****************************************************************************/
+        // Sort the files array.
+        if ($sorting_order == SCANDIR_SORT_ASCENDING) {
+          asort($files, SORT_NUMERIC);
+        }
+        else {
+          arsort($files, SORT_NUMERIC);
+        }
+
+        /****************************************************************************/
+        // Set the final return value.
+        $ret = array_keys($files);
+
+        /****************************************************************************/
+        // Return the final value.
+        return ($ret) ? $ret : [];
     }
 
 
