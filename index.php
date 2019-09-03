@@ -10,6 +10,27 @@
 */
 
 
+/**
+* Set config settings for RSS feed
+*/
+$config = [
+
+  // Header info of RSS feed
+  "title" => "",
+  "link" => "",
+  "description" => "",
+
+
+  // Name of each item
+  "item" => "item",
+
+
+  // Link to file protocol
+  "link_prefix" => "https://"
+
+];
+
+
 class File {
 
 
@@ -47,6 +68,8 @@ class File {
      * @return array
      */
     public function properties($path) {
+        global $config;
+
         // Create empty properties
         $properties = [
             "name" => "",
@@ -64,6 +87,7 @@ class File {
             $properties["size"] = filesize($path);
             $properties["type"] = mime_content_type($path);
             $properties["modified"] = filemtime($path);
+            $properties["url"] = dirname("{$config['link_prefix']}{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}") ."/". $path;
             // Return file properties
             return $properties;
         } else {
@@ -79,11 +103,7 @@ class File {
 class Xml {
 
 
-    function __construct($title="", $link="", $description="", $items=[]) {
-        /**  @var string Set xml properties */
-        $this->title       = $title;
-        $this->link        = $link;
-        $this->description = $description;
+    function __construct($items=[]) {
         /**  @var array All items */
         $this->items = $items;
     }
@@ -114,13 +134,15 @@ class Xml {
      * @return string
      */
     public function getText() {
+        global $config;
+
         // Create xml
         $output = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
 <rss version=\"2.0\">
 <channel>
-    <title>$this->title</title>
-    <link>$this->link</link>
-    <description>$this->description</description>
+    <title>". $config["title"] ."</title>
+    <link>". $config["link"] ."</link>
+    <description>". $config["description"] ."</description>
         ";
 
         // Add items
@@ -135,7 +157,7 @@ class Xml {
             }
             // Wrap item with <file> tag in $output
             $output .= "
-    <file>" . $item_xml . "</file>
+    <".$config["item"].">" . $item_xml . "</".$config["item"].">
             ";
         }
 
@@ -183,15 +205,15 @@ foreach($filesArr as $file) {
     // Get file properties
     $properties = $File->properties($filePath);
     $thisFile = [
-        ["name", $properties["name"]],
-        ["size", $properties["size"]],
-        ["type", $properties["type"]],
-        ["modified", $properties["modified"]]
+        ["title", $properties["name"]],
+        ["url", $properties["url"]],
     ];
     array_push($filePropertiesArr, $thisFile);
 }
 
 
 // Init xml obj
-$xml = new Xml("", "", "", $filePropertiesArr);
+$xml = new Xml($filePropertiesArr);
+
+// Print xml
 $xml->output();
