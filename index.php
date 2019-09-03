@@ -74,3 +74,55 @@ class File {
 
 
 }
+
+
+class Xml {
+
+
+    /**  @var string $output final output of xml text */
+    public $output = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
+<rss version=\"2.0\">
+
+      <channel>
+        <title></title>
+        <link></link>
+        <description></description>
+    ";
+
+
+    /**
+     * Add file to xml $output
+     *
+     * @return bool
+     */
+    public function addFile($properties) {
+        // Add file $properties to xml output
+        $this->output .= "
+            <file>
+                <name>". $properties["name"] ."</name>
+                <size>". $properties["size"] ."</size>
+                <type>". $properties["type"] ."</type>
+                <modified>". $properties["modified"] ."</modified>
+            </file>
+        ";
+
+        return true;
+    }
+
+
+    /**
+     * Print xml to page and exit
+     *
+     * @return $output
+     */
+    public function output() {
+        // End xml
+        $this->output .= "
+          </channel>
+          </rss>
+        ";
+        // Print xml and exit
+        die($this->output);
+    }
+
+}
