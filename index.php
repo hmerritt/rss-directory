@@ -21,7 +21,8 @@ $config = [
     "description" => "",
 
     // Namespace
-    "namespaces" => "xmlns:media=\"http://search.yahoo.com/mrss/\"",
+    // -> xmlns:media="http://search.yahoo.com/mrss/"
+    "namespaces" => "",
 
 
     // Name of each item
@@ -137,7 +138,7 @@ class Xml {
 
         // Create xml
         $output = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>
-<rss version=\"2.0\">
+<rss version=\"2.0\" {$config['namespaces']}>
 <channel>
     <title>". $config["title"] ."</title>
     <link>". $config["link"] ."</link>
