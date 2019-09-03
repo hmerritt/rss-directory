@@ -10,7 +10,7 @@
 */
 
 
-class Directory {
+class File {
 
 
     /**
@@ -18,7 +18,7 @@ class Directory {
      *
      * @return array
      */
-    public function scan($path) {
+    public function scanDir($path) {
         // Scan directory
         // remove unwanted values '.', '..'
         $scannedFiles = array_slice(scandir($path), 2);
@@ -38,6 +38,38 @@ class Directory {
         }
 
         return false;
+    }
+
+
+    /**
+     * Get file properties; name, size, date modified
+     *
+     * @return array
+     */
+    public function properties($path) {
+        // Create empty properties
+        $properties = [
+            "name" => "",
+            "size" => "",
+            "type" => "",
+            "modified" => ""
+        ];
+
+        // Check if file exists
+        if ($this->exists(($path)) {
+            // Get file path info
+            $filePathInfo = pathinfo($path);
+            // Set file properties
+            $properties["name"] = $filePathInfo["filename"];
+            $properties["size"] = filesize($path);
+            $properties["type"] = mime_content_type($path);
+            $properties["modified"] = filemtime($path);
+            // Return file properties
+            return $properties;
+        } else {
+            // Return empty template response
+            return $properties;
+        }
     }
 
 
