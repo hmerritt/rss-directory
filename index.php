@@ -20,6 +20,9 @@ $config = [
     "link" => "",
     "description" => "",
 
+    // Namespace
+    "namespaces" => "xmlns:media=\"http://search.yahoo.com/mrss/\"",
+
 
     // Name of each item
     "item" => "item",
@@ -207,6 +210,10 @@ foreach($filesArr as $file) {
     $properties = $File->properties($filePath);
     array_push($filePropertiesArr, $properties);
 }
+
+
+// Set output header to xml
+header("Content-type: text/xml");
 
 
 // Init xml obj
