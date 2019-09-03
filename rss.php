@@ -215,7 +215,7 @@ class Xml {
 
 
 // Get url params
-$path = $_GET["path"];
+$path = $_GET["dir"];
 
 
 // Init file obj and xml objects
